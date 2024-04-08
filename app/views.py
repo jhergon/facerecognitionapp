@@ -14,6 +14,9 @@ def index():
 def app():
     return render_template('app.html')
 
+def calculator():
+    return render_template('calculator.html')
+
 
 def genderapp():
     if request.method == 'POST':

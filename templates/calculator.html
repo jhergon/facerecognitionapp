@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block bodyblock %}
+<!-- 12 -->
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <title>Tabla con suma de porcentajes</title>
+            <style>
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            </style>
+            </head>
+            <body>
+
+            <table id="data-table">
+            <thead>
+                <tr>
+                <th>Attribute</th>
+                <th>Description</th>
+                <th>Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                <td>Version Control</td>
+                <td>Source code, and data should be managed using a version control system to track changes over time.</td>
+                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
+                </tr>
+                <tr>
+                <td>Associated Publication</td>
+                <td>The article gives all the necessary information to obtain an
+                    equivalent implementation (pseudocodes, mathematical details)</td>
+                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
+                </tr>
+                <tr>
+                <td>Automation </td>
+                <td>Reproducibility procedures should be automated as much as
+                    possible to reduce human error. </td>
+                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
+                </tr>
+                <tr>
+                <td>Containerization</td>
+                <td>The environment is controlled. The procedure to re-create the
+                    environment is provided, and it is complete</td>
+                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
+                </tr>
+                <tr>
+                <td>Documentation</td>
+                <td>Detailed documentation should accompany the application, explaining its purpose, usage, and inner workings. Installation
+                    instructions are complete</td>
+                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
+                </tr>
+                <tr>
+                <td>Data Provenance </td>
+                <td>Data sources and transformations should be well-documented
+                    to trace the origin of results</td>
+                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
+                </tr>
+                <tr>
+                <td>Validation</td>
+                <td>Validation of the application against known datasets or analytical solutions to ensure correctness.</td>
+                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
+                </tr>
+                <tr>
+                <td>Persistent Immutable Identifier</td>
+                <td>Assign a persistent immutable identifier to the application to
+                    facilitate citation and reference. (e.g, SWHID, DOI)
+                    </td>
+                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
+                </tr>
+                <tr>
+                <td>Use of Open Repositories</td>
+                <td>Utilize open repositories for storing source code, data, and documentation to enable easy access and collaboration.</td>
+                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
+                </tr>
+                <tr>
+                <td>Open Community Standards</td>
+                <td>Adhere to community standards and best practices for data
+                    formatting, analysis, and reporting.</td>
+                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
+                </tr>
+        
+                <!-- Agrega más filas aquí -->
+            </tbody>
+            </table>
+
+            <div>Total App Reproducibility Percentage: <span id="total">0%</span></div>
+
+            <script>
+            document.addEventListener("DOMContentLoaded", function() {
+            const checkboxes = document.querySelectorAll('.percentage-checkbox');
+            const totalSpan = document.getElementById('total');
+            
+            checkboxes.forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                let total = 0;
+                checkboxes.forEach(function(cb) {
+                    if (cb.checked) {
+                    total += parseFloat(cb.getAttribute('data-value'));
+                    }
+                });
+                
+                if (total > 100) {
+                    checkbox.checked = false;
+                    alert("The total percentage cannot exceed 100%");
+                } else {
+                    totalSpan.textContent = total + "%";
+                }
+                });
+            });
+            });
+            </script>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
