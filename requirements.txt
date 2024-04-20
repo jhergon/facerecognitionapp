@@ -24,4 +24,6 @@ unicorn==1.0.3
 webencodings==0.5.1
 Werkzeug==2.0.3
 wincertstore==0.2
+quandl
+tensorflow
 

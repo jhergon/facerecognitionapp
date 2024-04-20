@@ -1,0 +1,82 @@
+/**
+ * Copyright (C) 2019  The Software Heritage developers
+ * See the AUTHORS file at the top-level directory of this distribution
+ * License: GNU Affero General Public License version 3, or any later version
+ * See top-level LICENSE file for more information
+ */
+
+/* This file contains the main CSS to make the form/application usable,
+ * without being especially pretty.
+ */
+
+#noscriptError {
+    color: red;
+}
+
+.person {
+    display: inline-block;
+}
+
+#inputForm {
+    max-width: 100%;
+
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* A fieldset that contains only label/input pairs */
+.leafFieldset {
+    flex: auto;
+}
+
+p input, p textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.dynamicFields {
+    width: 100%;
+}
+
+.dynamicFields .moveButtons {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+#license {
+    /* License names are long */
+    min-width: 20em;
+}
+
+#funding {
+    /* Funding names are long */
+    min-width: 20em;
+}
+
+input[type=URL] {
+    /* URLs are longer than the other fields */
+    min-width: 20em;
+}
+.field-description {
+    color : rgb(100, 104, 103);
+    font-size: small;
+}
+
+#codemetaText {
+    width: 100%;
+    min-height: 10em;
+    border: 1px solid black;
+}
+
+#errorMessage {
+    color: red;
+}
+
+input:invalid {
+    color: red;
+}
+
+.selected-license {
+    margin: 2px;
+}

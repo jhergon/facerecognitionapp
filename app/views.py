@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import quandl as ql
 import matplotlib
 matplotlib.use('agg')  # Usar el backend 'agg'
+from sklearn.preprocessing import MinMaxScaler
+import tensorflow as tf
 
 UPLOAD_FOLDER = 'static/upload'
 
@@ -22,6 +24,9 @@ def app():
 
 def calculator():
     return render_template('calculator.html')
+
+def DOIschain():
+    return render_template('DOIschain.html')
 
 
 def genderapp():
@@ -66,7 +71,8 @@ def genderapp():
 def tradingapp():
 
     # Get data
-    dataset = ql.get("CHRIS/CME_ES1", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
+   # dataset = ql.get("CHRIS/CME_ES1", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
+    dataset = ql.get("CURRFX/USDEUR", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
     dataset = dataset.dropna()
     dataset = dataset[['Open', 'High', 'Low', 'Last']]
     dataset['H-L'] = dataset['Last'] - dataset['Open']
@@ -97,6 +103,83 @@ def tradingapp():
     plot_file_relative = url_for('static', filename='plot.png')
 
     return render_template('trading.html', plot_file=plot_file_relative)
-    
+
+
+
+def tradingapp2():
+    # Get data
+    dataset = ql.get("CHRIS/CME_ES1", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
+    dataset = dataset.dropna()
+    dataset = dataset[['Open', 'High', 'Low', 'Last']]
+    dataset['H-L'] = dataset['Last'] - dataset['Open']
+    dataset['O-C'] = dataset['High'] - dataset['Low']
+    dataset['10day MA'] = dataset['Last'].shift(1).rolling(window=10).mean()
+    dataset['20day MA'] = dataset['Last'].shift(1).rolling(window=20).mean()
+    dataset['55day MA'] = dataset['Last'].shift(1).rolling(window=55).mean()
+    dataset['stdev'] = dataset['Last'].rolling(window=55).std()
+    dataset['Price_Rise'] = np.where(dataset['Last'].shift(-1) > dataset['Last'], 1, 0)
+    dataset = dataset.dropna()
+
+    # Prepare data
+    scaler = MinMaxScaler(feature_range=(-1, 1))
+    data = scaler.fit_transform(dataset.iloc[:, 4:].values)
+    n = data.shape[0]
+    train_end = int(np.floor(0.8 * n))
+    X_train, Y_train = data[:train_end, :-1], data[:train_end, -1]
+    X_test, Y_test = data[train_end:, :-1], data[train_end:, -1]
+    n_features = X_train.shape[1]
+
+    # Neural network parameters
+    n_neurons = [512, 256, 128]
+
+    # Build neural network
+    X = tf.keras.layers.Input(shape=(n_features,))
+    layer = X
+    for neurons in n_neurons:
+        layer = tf.keras.layers.Dense(neurons, activation='relu')(layer)
+
+    out = tf.keras.layers.Dense(1)(layer)
+    model = tf.keras.Model(inputs=X, outputs=out)
+    model.compile(optimizer='adam', loss='mse')
+
+    # Train neural network
+    batch_size = 200
+    epochs = 10
+    model.fit(X_train, Y_train, batch_size=batch_size, epochs=epochs)
+
+    # Predictions
+    pred = model.predict(X_test)
+
+    # Threshold predictions
+    y_pred = (pred > 0.5).astype(np.float32)
+
+    # Trading strategy
+    dataset['y_pred'] = np.nan
+    dataset.iloc[-len(y_pred):, -1:] = y_pred
+    trade_dataset = dataset.dropna()
+
+    trade_dataset['Return_Tomorrow'] = np.log(trade_dataset['Last'].shift(-1) / trade_dataset['Last'])
+    trade_dataset['Strategy'] = np.where(trade_dataset['y_pred'] == 1, -trade_dataset['Return_Tomorrow'], trade_dataset['Return_Tomorrow'])
+    trade_dataset['Market_Accumulated'] = trade_dataset['Return_Tomorrow'].cumsum()
+    trade_dataset['Strategy_Accumulated'] = trade_dataset['Strategy'].cumsum()
+
+    # Plot results
+    plt.figure(figsize=(10, 5))
+    plt.plot(trade_dataset['Market_Accumulated'], label='Market_Accumulated')
+    plt.plot(trade_dataset['Strategy_Accumulated'], label='Strategy_Accumulated')
+    plt.legend()
+
+    # Save the plot to a file
+    plot_file = 'static/plot.png'
+    plt.savefig(plot_file)
+    plt.close()
+
+     #return render_template('trading.html', plot_file=plot_file)
+    # Generar la URL relativa para la imagen del gráfico
+    plot_file_relative = url_for('static', filename='plot.png')
+
+    return render_template('trading.html', plot_file=plot_file_relative)
+
+
 
 
