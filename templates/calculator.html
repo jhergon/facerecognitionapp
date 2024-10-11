@@ -5,135 +5,169 @@
 <div class="container">
     <br><br>
     <h3 class="display-6"> Reproducibility for verifiable, corroborable, trustworthy, credible, reliable, traceable, correctly rewarded scientific research</h3>
-        <br>
-            <p>
-                
-
-The following calculator is a simple tool to quantitatively have the percentage of reproducibility that a developed Application achieves
-                
-            </p>
+    <br>
+    <p>
+        The following calculator is a simple tool to quantitatively have the percentage of reproducibility that a developed Application achieves
+    </p>
 
     <div class="row">
         <div class="col">
             <title>Applicaction Reproducibility Checklist</title>
             <style>
-            table {
-                border-collapse: collapse;
-                width: 100%;
-            }
-            th, td {
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: left;
-            }
-            th {
-                background-color: #f2f2f2;
-            }
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                }
+                th {
+                    background-color: #f2f2f2;
+                }
             </style>
-            </head>
-            <body>
 
             <table id="data-table">
-            <thead>
-                <tr>
-                <th>Attribute</th>
-                <th>Description</th>
-                <th>Percentage</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                <td>Version Control</td>
-                <td>Source code, and data should be managed using a version control system to track changes over time.</td>
-                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
-                </tr>
-                <tr>
-                <td>Associated Publication</td>
-                <td>The article gives all the necessary information to obtain an
-                    equivalent implementation (pseudocodes, mathematical details)</td>
-                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
-                </tr>
-                <tr>
-                <td>Automation </td>
-                <td>Reproducibility procedures should be automated as much as
-                    possible to reduce human error. </td>
-                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
-                </tr>
-                <tr>
-                <td>Containerization</td>
-                <td>The environment is controlled. The procedure to re-create the
-                    environment is provided, and it is complete</td>
-                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
-                </tr>
-                <tr>
-                <td>Documentation</td>
-                <td>Detailed documentation should accompany the application, explaining its purpose, usage, and inner workings. Installation
-                    instructions are complete</td>
-                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
-                </tr>
-                <tr>
-                <td>Data Provenance </td>
-                <td>Data sources and transformations should be well-documented
-                    to trace the origin of results</td>
-                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
-                </tr>
-                <tr>
-                <td>Validation</td>
-                <td>Validation of the application against known datasets or analytical solutions to ensure correctness.</td>
-                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
-                </tr>
-                <tr>
-                <td>Persistent Immutable Identifier</td>
-                <td>Assign a persistent immutable identifier to the application to
-                    facilitate citation and reference. (e.g, SWHID, DOI)
-                    </td>
-                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
-                </tr>
-                <tr>
-                <td>Use of Open Repositories</td>
-                <td>Utilize open repositories for storing source code, data, and documentation to enable easy access and collaboration.</td>
-                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
-                </tr>
-                <tr>
-                <td>Open Community Standards</td>
-                <td>Adhere to community standards and best practices for data
-                    formatting, analysis, and reporting.</td>
-                <td><input type="checkbox" class="percentage-checkbox" data-value="10"></td>
-                </tr>
-        
-                <!-- Agrega más filas aquí -->
-            </tbody>
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Description</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Version Control</td>
+                        <td>Source code, and data should be managed using a version control system to track changes over time.</td>
+                        <td><input type="checkbox" class="percentage-checkbox" data-value="10" data-index="0"></td>
+                    </tr>
+                    <tr>
+                        <td>Associated Publication</td>
+                        <td>The article gives all the necessary information to obtain an equivalent implementation (pseudocodes, mathematical details)</td>
+                        <td><input type="checkbox" class="percentage-checkbox" data-value="10" data-index="1"></td>
+                    </tr>
+                    <tr>
+                        <td>Automation</td>
+                        <td>Reproducibility procedures should be automated as much as possible to reduce human error.</td>
+                        <td><input type="checkbox" class="percentage-checkbox" data-value="10" data-index="2"></td>
+                    </tr>
+                    <tr>
+                        <td>Containerization</td>
+                        <td>The environment is controlled. The procedure to re-create the environment is provided, and it is complete</td>
+                        <td><input type="checkbox" class="percentage-checkbox" data-value="10" data-index="3"></td>
+                    </tr>
+                    <tr>
+                        <td>Documentation</td>
+                        <td>Detailed documentation should accompany the application, explaining its purpose, usage, and inner workings. Installation instructions are complete</td>
+                        <td><input type="checkbox" class="percentage-checkbox" data-value="10" data-index="4"></td>
+                    </tr>
+                    <tr>
+                        <td>Data Provenance</td>
+                        <td>Data sources and transformations should be well-documented to trace the origin of results</td>
+                        <td><input type="checkbox" class="percentage-checkbox" data-value="10" data-index="5"></td>
+                    </tr>
+                    <tr>
+                        <td>Validation</td>
+                        <td>Validation of the application against known datasets or analytical solutions to ensure correctness.</td>
+                        <td><input type="checkbox" class="percentage-checkbox" data-value="10" data-index="6"></td>
+                    </tr>
+                    <tr>
+                        <td>Persistent Immutable Identifier</td>
+                        <td>Assign a persistent immutable identifier to the application to facilitate citation and reference. (e.g, SWHID, DOI)</td>
+                        <td><input type="checkbox" class="percentage-checkbox" data-value="10" data-index="7"></td>
+                    </tr>
+                    <tr>
+                        <td>Use of Open Repositories</td>
+                        <td>Utilize open repositories for storing source code, data, and documentation to enable easy access and collaboration.</td>
+                        <td><input type="checkbox" class="percentage-checkbox" data-value="10" data-index="8"></td>
+                    </tr>
+                    <tr>
+                        <td>Open Community Standards</td>
+                        <td>Adhere to community standards and best practices for data formatting, analysis, and reporting.</td>
+                        <td><input type="checkbox" class="percentage-checkbox" data-value="10" data-index="9"></td>
+                    </tr>
+                </tbody>
             </table>
 
             <div>Total App Reproducibility Percentage: <span id="total">0%</span></div>
 
+            <!-- Contenedor para el gráfico de radar -->
+            <canvas id="radialChart" width="400" height="400"></canvas>
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <script>
-            document.addEventListener("DOMContentLoaded", function() {
-            const checkboxes = document.querySelectorAll('.percentage-checkbox');
-            const totalSpan = document.getElementById('total');
-            
-            checkboxes.forEach(function(checkbox) {
-                checkbox.addEventListener('change', function() {
-                let total = 0;
-                checkboxes.forEach(function(cb) {
-                    if (cb.checked) {
-                    total += parseFloat(cb.getAttribute('data-value'));
-                    }
+                document.addEventListener("DOMContentLoaded", function() {
+                    const checkboxes = document.querySelectorAll('.percentage-checkbox');
+                    const totalSpan = document.getElementById('total');
+                    const ctx = document.getElementById('radialChart').getContext('2d');
+                    let total = 0;
+
+                    // Datos iniciales del gráfico radial
+                    let radarData = Array(10).fill(0); // 10 atributos, todos empezando en 0.
+
+                    // Crear el gráfico de radar
+                    const radialChart = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: [
+                                'Version Control',
+                                'Associated Publication',
+                                'Automation',
+                                'Containerization',
+                                'Documentation',
+                                'Data Provenance',
+                                'Validation',
+                                'Persistent ID',
+                                'Open Repositories',
+                                'Community Standards'
+                            ],
+                            datasets: [{
+                                label: 'Reproducibility Percentage',
+                                data: radarData,
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 2,
+                                pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                            }]
+                        },
+                        options: {
+                            scale: {
+                                ticks: {
+                                    beginAtZero: true,
+                                    max: 10
+                                }
+                            }
+                        }
+                    });
+
+                    checkboxes.forEach(function(checkbox) {
+                        checkbox.addEventListener('change', function() {
+                            total = 0;
+                            radarData = Array(10).fill(0); // Reiniciar los datos del radar
+
+                            checkboxes.forEach(function(cb) {
+                                if (cb.checked) {
+                                    total += parseFloat(cb.getAttribute('data-value'));
+                                    const index = cb.getAttribute('data-index');
+                                    radarData[index] = parseFloat(cb.getAttribute('data-value')); // Actualizar el dato correspondiente al eje
+                                }
+                            });
+
+                            if (total > 100) {
+                                checkbox.checked = false;
+                                alert("The total percentage cannot exceed 100%");
+                            } else {
+                                totalSpan.textContent = total + "%";
+                                radialChart.data.datasets[0].data = radarData; // Actualizar los datos del gráfico
+                                radialChart.update(); // Actualizar el gráfico
+                            }
+                        });
+                    });
                 });
-                
-                if (total > 100) {
-                    checkbox.checked = false;
-                    alert("The total percentage cannot exceed 100%");
-                } else {
-                    totalSpan.textContent = total + "%";
-                }
-                });
-            });
-            });
             </script>
         </div>
     </div>
 </div>
-
 
 {% endblock %}
