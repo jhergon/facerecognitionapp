@@ -123,7 +123,7 @@ def tradingapp():
 #https://data.nasdaq.com/api/v3/datatables/QDL/FON/metadata?api_key=hiqkVfCKR65jR9y7yvoM
 #https://docs.data.nasdaq.com/docs/in-depth-usage-1
 #https://www.quantconnect.com/docs/v2/writing-algorithms/consolidating-data/getting-started
-
+#!pip install nasdaq-data-link
 import nasdaqdatalink
 def tradingapp2():
     # Get data
