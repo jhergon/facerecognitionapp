@@ -1,0 +1,57 @@
+
+{% extends 'base.html' %}
+
+{% block bodyblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results</title>
+</head>
+<body>
+    <h1>Results for: {{ title }}</h1>
+    
+    <h2>GitHub Repository: {{ repo_name }}</h2>
+    <p><strong>Forks:</strong> {{ forks }}</p>
+    <p><strong>Stars:</strong> {{ stars }}</p>
+    <p><strong>Contributors:</strong> {{ contributors }}</p>
+    <p><strong>Paper Citation Count:</strong> {{ citations }}</p>
+    <p><strong>Owner Followers:</strong> {{ followers }}</p>
+    <p><strong>Research Impact Factor (RIF):</strong> {{ factor }}</p>
+
+    <!-- Authors Line -->
+    <p><strong>Authors:</strong> 
+        {% for author in authors %}
+            {{ author.name }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+
+    <!-- Radar Chart Image -->
+    <h2>Research Metrics</h2>
+    <img src="data:image/png;base64,{{ plot_url }}" alt="Radar Chart" />
+
+    <!-- Authors Table -->
+    <h2>Author Details</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Paper Count</th>
+                <th>Citation Count</th>
+                <th>H-index</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for author in authors %}
+            <tr>
+                <td>{{ author.name }}</td>
+                <td>{{ author.papers }}</td>
+                <td>{{ author.citations }}</td>
+                <td>{{ author.h_index }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br><br>
+    <a href="/">Back to Query</a>
+</body>
+{% endblock %}

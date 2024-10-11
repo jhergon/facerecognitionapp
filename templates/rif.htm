@@ -1,0 +1,22 @@
+
+{% extends 'base.html' %}
+{% block bodyblock %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publication and Repository Lookup</title>
+</head>
+<body>
+    <h1>Search for a Publication and GitHub Repository</h1>
+    <form method="POST">
+        <label for="title">Publication Title:</label><br>
+        <input type="text" id="title" name="title" required><br><br>
+
+        <label for="repo_url">GitHub Repository URL:</label><br>
+        <input type="text" id="repo_url" name="repo_url" required><br><br>
+
+        <button type="submit">Search</button>
+    </form>
+</body>
+{% endblock %}

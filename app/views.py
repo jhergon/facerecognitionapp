@@ -12,8 +12,14 @@ import matplotlib
 matplotlib.use('agg')  # Usar el backend 'agg'
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
-#
+
+import io
+import base64
+import requests
+
 UPLOAD_FOLDER = 'static/upload'
+# Your GitHub token (replace with your own token)
+
 
 def index():
     return render_template('index.html')
@@ -24,6 +30,9 @@ def app():
 
 def calculator():
     return render_template('calculator.html')
+
+def rif():
+    return render_template('rif.htm')
 
 def DOIschain():
     return render_template('DOIschain.html')
@@ -74,18 +83,18 @@ def tradingapp():
    # dataset = ql.get("CHRIS/CME_ES1", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
     dataset = ql.get("CURRFX/USDEUR", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
     dataset = dataset.dropna()
-    dataset = dataset[['Open', 'High', 'Low', 'Last']]
-    dataset['H-L'] = dataset['Last'] - dataset['Open']
-    dataset['O-C'] = dataset['High'] - dataset['Low']
-    dataset['10day MA'] = dataset['Last'].shift(1).rolling(window=10).mean()
-    dataset['20day MA'] = dataset['Last'].shift(1).rolling(window=20).mean()
-    dataset['55day MA'] = dataset['Last'].shift(1).rolling(window=55).mean()
-    dataset['stdev'] = dataset['Last'].rolling(window=55).std()
-    dataset['Price_Rise'] = np.where(dataset['Last'].shift(-1) > dataset['Last'], 1, 0)
+    dataset = dataset[['open', 'high', 'low', 'close']]
+    dataset['H-L'] = dataset['close'] - dataset['open']
+    dataset['O-C'] = dataset['high'] - dataset['low']
+    dataset['10day MA'] = dataset['close'].shift(1).rolling(window=10).mean()
+    dataset['20day MA'] = dataset['close'].shift(1).rolling(window=20).mean()
+    dataset['55day MA'] = dataset['close'].shift(1).rolling(window=55).mean()
+    dataset['stdev'] = dataset['close'].rolling(window=55).std()
+    dataset['Price_Rise'] = np.where(dataset['close'].shift(-1) > dataset['close'], 1, 0)
     dataset = dataset.dropna()
 
     # Trading strategy
-    dataset['Return_Tomorrow'] = np.log(dataset['Last'].shift(-1) / dataset['Last'])
+    dataset['Return_Tomorrow'] = np.log(dataset['close'].shift(-1) / dataset['close'])
     dataset['Market_Accumulated'] = dataset['Return_Tomorrow'].cumsum()
 
     # Plot results
@@ -104,20 +113,41 @@ def tradingapp():
 
     return render_template('trading.html', plot_file=plot_file_relative)
 
+############
+#toco cambiar la quanl porque cambio de empresa
+#https://github.com/matplotlib/mplfinance/issues/129
+#https://github.com/Nasdaq/data-link-python/#local-api-key-environment-variable
+#https://github.com/quandl/quandl-python?tab=readme-ov-file
+#https://docs.data.nasdaq.com/docs/python-tables
+#endpoint
+#https://data.nasdaq.com/api/v3/datatables/QDL/FON/metadata?api_key=hiqkVfCKR65jR9y7yvoM
+#https://docs.data.nasdaq.com/docs/in-depth-usage-1
+#https://www.quantconnect.com/docs/v2/writing-algorithms/consolidating-data/getting-started
 
-
+import nasdaqdatalink
 def tradingapp2():
     # Get data
-    dataset = ql.get("CHRIS/CME_ES1", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
+    #dataset = ql.get("CHRIS/CME_ES1", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
+    #dataset = ql.get("WIKI/AAPL", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
+    nasdaqdatalink.ApiConfig.api_key = 'hiqkVfCKR65jR9y7yvoM'
+    #dataset = nasdaqdatalink.get_table('ZACKS/FC', ticker='AAPL')
+    dataset = nasdaqdatalink.get_table('WIKI/PRICES', qopts = { 'columns': ['ticker', 'date', 'open', 'high', 'low', 'close'] }, ticker = ['AAPL'], date = { 'gte': '2016-01-01', 'lte': '2016-12-31' })
+    #dataset = nasdaqdatalink.get('NSE/OIL')
+    
+    #dataset = nasdaqdatalink.get("CHRIS/CME_ES1", 
+       #                      start_date="2023-01-01",  # Proporciona un rango de fechas válido
+               #              end_date="2023-12-31")  # Usa tu API Key válida
     dataset = dataset.dropna()
-    dataset = dataset[['Open', 'High', 'Low', 'Last']]
-    dataset['H-L'] = dataset['Last'] - dataset['Open']
-    dataset['O-C'] = dataset['High'] - dataset['Low']
-    dataset['10day MA'] = dataset['Last'].shift(1).rolling(window=10).mean()
-    dataset['20day MA'] = dataset['Last'].shift(1).rolling(window=20).mean()
-    dataset['55day MA'] = dataset['Last'].shift(1).rolling(window=55).mean()
-    dataset['stdev'] = dataset['Last'].rolling(window=55).std()
-    dataset['Price_Rise'] = np.where(dataset['Last'].shift(-1) > dataset['Last'], 1, 0)
+   # dataset = dataset[['open', 'high', 'low', 'close']]
+    dataset = dataset.set_index('date')
+    dataset = dataset[['open', 'high', 'low', 'close']]
+    dataset['H-L'] = dataset['close'] - dataset['open']
+    dataset['O-C'] = dataset['high'] - dataset['low']
+    dataset['10day MA'] = dataset['close'].shift(1).rolling(window=10).mean()
+    dataset['20day MA'] = dataset['close'].shift(1).rolling(window=20).mean()
+    dataset['55day MA'] = dataset['close'].shift(1).rolling(window=55).mean()
+    dataset['stdev'] = dataset['close'].rolling(window=55).std()
+    dataset['Price_Rise'] = np.where(dataset['close'].shift(-1) > dataset['close'], 1, 0)
     dataset = dataset.dropna()
 
     # Prepare data
@@ -158,7 +188,7 @@ def tradingapp2():
     dataset.iloc[-len(y_pred):, -1:] = y_pred
     trade_dataset = dataset.dropna()
 
-    trade_dataset['Return_Tomorrow'] = np.log(trade_dataset['Last'].shift(-1) / trade_dataset['Last'])
+    trade_dataset['Return_Tomorrow'] = np.log(trade_dataset['close'].shift(-1) / trade_dataset['close'])
     trade_dataset['Strategy'] = np.where(trade_dataset['y_pred'] == 1, -trade_dataset['Return_Tomorrow'], trade_dataset['Return_Tomorrow'])
     trade_dataset['Market_Accumulated'] = trade_dataset['Return_Tomorrow'].cumsum()
     trade_dataset['Strategy_Accumulated'] = trade_dataset['Strategy'].cumsum()
@@ -182,4 +212,141 @@ def tradingapp2():
 
 
 
+##############################
 
+def rifapp():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        repo_url = request.form.get('repo_url')
+
+        # Standard deviations for normalization
+        sigma_contributors_count = 2.556929
+        sigma_owner_followers = 4109.995792
+        sigma_forks_count = 83.046059 
+        sigma_stargazers_count = 475.880867 
+        sigma_citation_count = 227.967523
+
+        # Get paper and author details from Semantic Scholar
+        paper_id, paper_citation_count, authors = get_semanticscholar_info(title)
+        
+        # Get GitHub repository details
+        repo_name, repo_html_url, stargazers_count, forks_count, language, owner_followers, contributors_count = get_github_info(repo_url)
+
+        # Calculate the custom Research Impact Factor (RIF)
+        rif = 0.5 * (int(paper_citation_count) if paper_citation_count != 'No citation info' else 0) / sigma_citation_count \
+            + 0.45 * stargazers_count / sigma_stargazers_count \
+            + 0.05 * forks_count / sigma_forks_count
+
+        # Generate radar chart
+        categories = ['Stars', 'Forks', 'Citations', 'Owner Followers', 'Contributors']
+        values = [stargazers_count, forks_count, int(paper_citation_count) if paper_citation_count != 'No citation info' else 0, owner_followers, contributors_count]
+        
+        # close any existing plot
+        plt.close()
+
+        # Create radar plot
+        fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+        angles = [n / float(len(categories)) * 2 * 3.14159 for n in range(len(categories))]
+        values += values[:1]
+        angles += angles[:1]
+        
+        ax.fill(angles, values, color='blue', alpha=0.25)
+        ax.plot(angles, values, color='blue', linewidth=2)
+        ax.set_yticklabels([])
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(categories)
+        
+        # Convert plot to PNG in base64 format for embedding in HTML
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        img.seek(0)
+        plot_url = base64.b64encode(img.getvalue()).decode('utf8')
+
+        # Render results with the radar chart and table of authors
+        return render_template('result_rif.htm', title=title, authors=authors, repo_name=repo_name, forks=forks_count, stars=stargazers_count, contributors=contributors_count, citations=paper_citation_count, followers=owner_followers, factor=rif, plot_url=plot_url)
+
+    return render_template('rif.htm')
+
+
+
+# Function to get detailed author data by their IDs
+def get_author_data_by_ids(author_ids):
+    url = 'https://api.semanticscholar.org/graph/v1/author/batch'
+    query_params = {
+        'fields': 'name,paperCount,citationCount,hIndex'
+    }
+    response = requests.post(url, params=query_params, json={"ids": author_ids})
+
+    if response.status_code == 200:
+        return response.json()  # Return response in JSON format
+    else:
+        print(f"Error: request failed with status code {response.status_code}")
+        return None
+
+# Function to get paper details and author information from Semantic Scholar by title
+def get_semanticscholar_info(title):
+    try:
+        # Search for the paper using the title
+        url = f"https://api.semanticscholar.org/graph/v1/paper/search/match?query={title}&fields=paperId,citationCount,authors"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            data = response.json().get('data', [])
+            if data:
+                # Extract paper information (citation count for the paper)
+                paper_id = data[0].get('paperId', 'No paperId')
+                paper_citation_count = data[0].get('citationCount', 'No citation info')
+
+                # Extract authors and fetch their individual citation, paper counts, and h-index
+                authors_info = []
+                author_ids = [author['authorId'] for author in data[0].get('authors', [])]
+                if author_ids:
+                    authors_data = get_author_data_by_ids(author_ids)
+                    if authors_data:
+                        for author in authors_data:
+                            authors_info.append({
+                                'name': author.get('name', 'N/A'),
+                                'papers': author.get('paperCount', 'N/A'),
+                                'citations': author.get('citationCount', 'N/A'),
+                                'h_index': author.get('hIndex', 'N/A')
+                            })
+                # Return both paper citation count and detailed author data
+                return paper_id, paper_citation_count, authors_info
+
+        return 'No paperId', 'No citation info', []
+
+    except Exception as e:
+        print(f"Error fetching Semantic Scholar data for {title}: {e}")
+        return 'Error', 'Error', []
+
+# Function to get GitHub repository details
+def get_github_info(repo_url):
+    
+    try:
+        if not repo_url.startswith('https://github.com/'):
+            print(f"Invalid repository URL: {repo_url}")
+            return 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A'
+
+        repo_path = repo_url.replace('https://github.com/', '').strip()
+        api_url = f"https://api.github.com/repos/{repo_path}"
+        headers = {'Accept': 'application/vnd.github+json'}
+        response = requests.get(api_url, headers=headers)
+
+        if response.status_code == 200:
+            repo = response.json()
+            owner = repo['owner']['login']
+            owner_url = f"https://api.github.com/users/{owner}"
+            owner_response = requests.get(owner_url, headers=headers)
+            owner_followers = owner_response.json().get("followers", 0) if owner_response.status_code == 200 else "N/A"
+
+            contributors_url = f"https://api.github.com/repos/{repo_path}/contributors"
+            contributors_response = requests.get(contributors_url, headers=headers)
+            contributors_count = len(contributors_response.json()) if contributors_response.status_code == 200 else "N/A"
+
+            return repo.get('full_name', ''), repo.get('html_url', ''), repo.get('stargazers_count', 0), repo.get('forks_count', 0), repo.get('language', ''), owner_followers, contributors_count
+        
+        return 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A'
+
+    except Exception as e:
+        print(f"Error retrieving GitHub data for {repo_url}: {e}")
+        return 'Error', 'Error', 'Error', 'Error', 'Error', 'Error'
