@@ -12,7 +12,7 @@ import matplotlib
 matplotlib.use('agg')  # Usar el backend 'agg'
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
-
+#
 UPLOAD_FOLDER = 'static/upload'
 
 def index():
