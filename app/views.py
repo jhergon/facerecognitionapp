@@ -320,9 +320,12 @@ def rifapp():
         plot_url = base64.b64encode(img.getvalue()).decode('utf8')
 
         # Render results with the radar chart and table of authors
-        return render_template('result_rif.htm', title=title, authors=authors, repo_name=repo_name, forks=forks_count, stars=stargazers_count, contributors=contributors_count, citations=paper_citation_count, followers=owner_followers, factor=rif, plot_url=plot_url)
+        #return render_template('result_rif.htm', title=title, authors=authors, repo_name=repo_name, forks=forks_count, stars=stargazers_count, contributors=contributors_count, citations=paper_citation_count, followers=owner_followers, factor=rif, plot_url=plot_url)
 
-    return render_template('rif.htm')
+    #return render_template('rif.htm')
+        return render_template('rift.html', title=title, authors=authors, repo_name=repo_name, forks=forks_count, stars=stargazers_count, contributors=contributors_count, citations=paper_citation_count, followers=owner_followers, factor=rif, plot_url=plot_url)
+
+    return render_template('rift.html')
 
 
 
