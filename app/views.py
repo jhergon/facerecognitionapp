@@ -404,8 +404,9 @@ def get_github_info(repo_url):
             contributors_count = len(contributors_response.json()) if contributors_response.status_code == 200 else "N/A"
 
             return repo.get('full_name', ''), repo.get('html_url', ''), repo.get('stargazers_count', 0), repo.get('forks_count', 0), repo.get('language', ''), owner_followers, contributors_count
-        
-        return 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A'
+        r=response.status_code
+        print(f"Error 200 retrieving GitHub data for {repo_url}: {r}")
+        return 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A' , 'N/A'
 
     except Exception as e:
         print(f"Error retrieving GitHub data for {repo_url}: {e}")
