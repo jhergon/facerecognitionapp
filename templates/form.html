@@ -1,0 +1,32 @@
+
+{% extends 'base.html' %}
+{% block bodyblock %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Certificates</title>
+</head>
+<body>
+    <h1>Blockchain Certificates</h1>
+
+    <!-- Section for adding certificates -->
+    <h2>Add Certificate</h2>
+    <form action="/" method="POST">
+        <label for="certificate_hash">Certificate Hash:</label>
+        <input type="text" id="certificate_hash" name="certificate_hash" required>
+        <button type="submit">Add to Blockchain</button>
+    </form>
+    <p id="addResponse">{{ add_message }}</p> <!-- Display the result after adding a certificate -->
+
+    <!-- Section for validating certificates -->
+    <h2>Validate Certificate</h2>
+    <form action="/" method="POST">
+        <label for="certificate_hash_validate">Certificate Hash:</label>
+        <input type="text" id="certificate_hash_validate" name="certificate_hash_validate" required>
+        <button type="submit">Validate in Blockchain</button>
+    </form>
+    <p id="validateResponse">{{ validate_message }}</p> <!-- Display the result after validating a certificate -->
+
+</body>
+{% endblock %}

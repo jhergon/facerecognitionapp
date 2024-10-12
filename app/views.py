@@ -77,41 +77,7 @@ def genderapp():
     
     return render_template('gender.html',fileupload=False) # GET REQUEST
 
-def tradingapp():
 
-    # Get data
-   # dataset = ql.get("CHRIS/CME_ES1", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
-    dataset = ql.get("CURRFX/USDEUR", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
-    dataset = dataset.dropna()
-    dataset = dataset[['open', 'high', 'low', 'close']]
-    dataset['H-L'] = dataset['close'] - dataset['open']
-    dataset['O-C'] = dataset['high'] - dataset['low']
-    dataset['10day MA'] = dataset['close'].shift(1).rolling(window=10).mean()
-    dataset['20day MA'] = dataset['close'].shift(1).rolling(window=20).mean()
-    dataset['55day MA'] = dataset['close'].shift(1).rolling(window=55).mean()
-    dataset['stdev'] = dataset['close'].rolling(window=55).std()
-    dataset['Price_Rise'] = np.where(dataset['close'].shift(-1) > dataset['close'], 1, 0)
-    dataset = dataset.dropna()
-
-    # Trading strategy
-    dataset['Return_Tomorrow'] = np.log(dataset['close'].shift(-1) / dataset['close'])
-    dataset['Market_Accumulated'] = dataset['Return_Tomorrow'].cumsum()
-
-    # Plot results
-    plt.figure(figsize=(10, 5))
-    plt.plot(dataset['Market_Accumulated'], label='Market_Accumulated')
-    plt.legend()
-
-    # Save the plot to a file
-    plot_file = 'static/plot.PNG'
-    plt.savefig(plot_file)
-    plt.close()
-
-    #return render_template('trading.html', plot_file=plot_file)
-    # Generar la URL relativa para la imagen del gráfico
-    plot_file_relative = url_for('static', filename='plot.png')
-
-    return render_template('trading.html', plot_file=plot_file_relative)
 
 ############
 #toco cambiar la quanl porque cambio de empresa
@@ -125,7 +91,7 @@ def tradingapp():
 #https://www.quantconnect.com/docs/v2/writing-algorithms/consolidating-data/getting-started
 #!pip install nasdaq-data-link
 import nasdaqdatalink
-def tradingapp2():
+def tradingapp3():
     # Get data
     #dataset = ql.get("CHRIS/CME_ES1", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
     #dataset = ql.get("WIKI/AAPL", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
@@ -210,6 +176,97 @@ def tradingapp2():
 
     return render_template('trading.html', plot_file=plot_file_relative)
 
+import nasdaqdatalink
+def tradingapp2():
+    # Get data
+    #dataset = ql.get("CHRIS/CME_ES1", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
+    #dataset = ql.get("WIKI/AAPL", start_date="", end_date="", api_key='hiqkVfCKR65jR9y7yvoM')
+    nasdaqdatalink.ApiConfig.api_key = 'hiqkVfCKR65jR9y7yvoM'
+    plot_file_relative = None  # Initialize plot file variable
+    selected_ticker = None  # Initialize ticker variable
+
+    if request.method == 'POST':
+        # Get the selected stock ticker from the form
+        selected_ticker = request.form.get('ticker')
+
+        # Get data for the selected ticker
+        dataset = nasdaqdatalink.get_table(
+            'WIKI/PRICES',
+            qopts={'columns': ['ticker', 'date', 'open', 'high', 'low', 'close']},
+            ticker=[selected_ticker],
+            date={'gte': '2016-01-01', 'lte': '2016-12-31'}
+        )
+
+        dataset = dataset.dropna()
+        dataset = dataset.set_index('date')
+        dataset = dataset[['open', 'high', 'low', 'close']]
+        dataset['H-L'] = dataset['close'] - dataset['open']
+        dataset['O-C'] = dataset['high'] - dataset['low']
+        dataset['10day MA'] = dataset['close'].shift(1).rolling(window=10).mean()
+        dataset['20day MA'] = dataset['close'].shift(1).rolling(window=20).mean()
+        dataset['55day MA'] = dataset['close'].shift(1).rolling(window=55).mean()
+        dataset['stdev'] = dataset['close'].rolling(window=55).std()
+        dataset['Price_Rise'] = np.where(dataset['close'].shift(-1) > dataset['close'], 1, 0)
+        dataset = dataset.dropna()
+
+        # Prepare data
+        scaler = MinMaxScaler(feature_range=(-1, 1))
+        data = scaler.fit_transform(dataset.iloc[:, 4:].values)
+        n = data.shape[0]
+        train_end = int(np.floor(0.8 * n))
+        X_train, Y_train = data[:train_end, :-1], data[:train_end, -1]
+        X_test, Y_test = data[train_end:, :-1], data[train_end:, -1]
+        n_features = X_train.shape[1]
+
+        # Neural network parameters
+        n_neurons = [512, 256, 128]
+
+        # Build neural network
+        X = tf.keras.layers.Input(shape=(n_features,))
+        layer = X
+        for neurons in n_neurons:
+            layer = tf.keras.layers.Dense(neurons, activation='relu')(layer)
+
+        out = tf.keras.layers.Dense(1)(layer)
+        model = tf.keras.Model(inputs=X, outputs=out)
+        model.compile(optimizer='adam', loss='mse')
+
+        # Train neural network
+        batch_size = 200
+        epochs = 10
+        model.fit(X_train, Y_train, batch_size=batch_size, epochs=epochs)
+
+        # Predictions
+        pred = model.predict(X_test)
+
+        # Threshold predictions
+        y_pred = (pred > 0.5).astype(np.float32)
+
+        # Trading strategy
+        dataset['y_pred'] = np.nan
+        dataset.iloc[-len(y_pred):, -1:] = y_pred
+        trade_dataset = dataset.dropna()
+
+        trade_dataset['Return_Tomorrow'] = np.log(trade_dataset['close'].shift(-1) / trade_dataset['close'])
+        trade_dataset['Strategy'] = np.where(trade_dataset['y_pred'] == 1, -trade_dataset['Return_Tomorrow'], trade_dataset['Return_Tomorrow'])
+        trade_dataset['Market_Accumulated'] = trade_dataset['Return_Tomorrow'].cumsum()
+        trade_dataset['Strategy_Accumulated'] = trade_dataset['Strategy'].cumsum()
+
+        # Plot results
+        plt.figure(figsize=(10, 5))
+        plt.plot(trade_dataset['Market_Accumulated'], label='Market Accumulated')
+        plt.plot(trade_dataset['Strategy_Accumulated'], label='Strategy Accumulated')
+        plt.legend()
+
+        # Save the plot to a file
+        plot_file = 'static/plot.png'
+        plt.savefig(plot_file)
+        plt.close()
+
+        # Generate the URL relative for the image of the plot
+        plot_file_relative = 'static/plot.png'
+
+    return render_template('trading.html', plot_file=plot_file_relative, ticker=selected_ticker)
 
 
 ##############################
@@ -350,3 +407,108 @@ def get_github_info(repo_url):
     except Exception as e:
         print(f"Error retrieving GitHub data for {repo_url}: {e}")
         return 'Error', 'Error', 'Error', 'Error', 'Error', 'Error'
+    
+
+#########blockchain certificates######
+
+import datetime
+import hashlib
+import json
+
+# Blockchain class
+class Blockchain:
+    
+    def __init__(self):
+        self.chain = []
+        self.certificates = []  # Store certificate hashes
+        self.create_block(proof=1, previous_hash='0')
+
+    def create_block(self, proof, previous_hash, certificate_hash=None):
+        block = {
+            'index': len(self.chain) + 1,
+            'timestamp': str(datetime.datetime.now()),
+            'proof': proof,
+            'previous_hash': previous_hash,
+            'certificate_hash': certificate_hash  # Store the certificate hash
+        }
+        self.chain.append(block)
+        return block
+
+    def get_previous_block(self):
+        return self.chain[-1]
+
+    def proof_of_work(self, previous_proof):
+        new_proof = 1
+        check_proof = False
+        while not check_proof:
+            hash_operation = hashlib.sha256(str(new_proof**2 - previous_proof**2).encode()).hexdigest()
+            if hash_operation[:4] == '0000':
+                check_proof = True
+            else:
+                new_proof += 1
+        return new_proof
+
+    def hash(self, block):
+        encoded_block = json.dumps(block, sort_keys=True).encode()
+        return hashlib.sha256(encoded_block).hexdigest()
+
+    def add_certificate(self, certificate_hash):
+        if certificate_hash in self.certificates:  # Check if certificate already exists
+            return None  # Indicate that the certificate already exists
+
+        # If it doesn't exist, add the certificate to the list
+        self.certificates.append(certificate_hash)
+        previous_block = self.get_previous_block()
+        previous_proof = previous_block['proof']
+        proof = self.proof_of_work(previous_proof)
+        previous_hash = self.hash(previous_block)
+        block = self.create_block(proof, previous_hash, certificate_hash)
+        return block
+
+    def validate_certificate(self, certificate_hash):
+        for block in self.chain:
+            if block.get('certificate_hash') == certificate_hash:
+                return block
+        return None
+
+
+# Flask app initialization
+#app = Flask(__name__)
+
+# Create blockchain instance
+blockchain = Blockchain()
+
+# Route for the main page with forms
+#@app.route('/', methods=['GET', 'POST'])
+def app_certificates():
+# Create blockchain instance
+   
+    if request.method == 'POST':
+        if 'certificate_hash' in request.form:  # Add Certificate Form Submission
+            certificate_hash = request.form.get('certificate_hash')
+            if not certificate_hash:
+                return render_template('form2.html', add_message='Certificate hash is required')
+            
+            # Add the certificate to the blockchain
+            block = blockchain.add_certificate(certificate_hash)
+            if block:
+                add_message = f'Success! Certificate added at block {block["index"]}, on {block["timestamp"]}.'
+            else:
+                add_message = 'This certificate already exists in the blockchain.'
+            return render_template('form2.html', add_message=add_message)
+
+        elif 'certificate_hash_validate' in request.form:  # Validate Certificate Form Submission
+            certificate_hash = request.form.get('certificate_hash_validate')
+            if not certificate_hash:
+                return render_template('form2.html', validate_message='Certificate hash is required')
+
+            # Validate the certificate
+            block = blockchain.validate_certificate(certificate_hash)
+            if block:
+                validate_message = f'Certificate found in block {block["index"]}, timestamp: {block["timestamp"]}.'
+            else:
+                validate_message = 'This certificate does not exist in the blockchain.'
+            return render_template('form2.html', validate_message=validate_message)
+    
+    # On GET request, show the form with no messages
+    return render_template('form2.html')

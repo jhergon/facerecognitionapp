@@ -3,13 +3,34 @@
 
 {% block bodyblock %}
 <!-- 12 -->
-<div class="container">
-        <br><br>
-        <h3 class="display-6"> Trading APP - makes predictions through deep learning of exchange currency strategy</h3>
-            <br>
-    <h1>Market Accumulated  USD / EUR</h1>
-    <img src="{{ plot_file }}" alt="Market Accumulated Plot">
-</div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading App</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Select a Stock Ticker</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label for="ticker">Choose a stock:</label>
+                <select id="ticker" name="ticker" class="form-control">
+                    <option value="AAPL">Apple (AAPL)</option>
+                    <option value="MSFT">Microsoft (MSFT)</option>
+                    <!-- Add more stocks as needed -->
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Analyze</button>
+        </form>
+
+        {% if plot_file %}
+        <hr>
+        <h3 class="display-6">Trading Results for {{ ticker }}</h3>
+        <img src="{{ url_for('static', filename='plot.png') }}" alt="Market Accumulated Plot" class="img-fluid">
+        {% endif %}
+    </div>
+</body>
 
 
 {% endblock %}
