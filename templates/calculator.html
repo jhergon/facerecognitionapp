@@ -7,7 +7,7 @@
     <h3 class="display-6"> Reproducibility for verifiable, corroborable, trustworthy, credible, reliable, traceable, correctly rewarded scientific research</h3>
     <br>
     <p>
-        The following calculator is a simple tool to quantitatively have the percentage of reproducibility that a developed Application achieves
+        The following calculator is a simple tool to quantitatively have the percentage of reproducibility that a developed Application achieves.
     </p>
 
     <div class="row">
@@ -26,8 +26,27 @@
                 th {
                     background-color: #f2f2f2;
                 }
+                #buttons {
+                    margin-top: 20px;
+                }
+                #buttons button {
+                    margin-right: 10px;
+                }
+                #certificationHash {
+                    margin-top: 20px;
+                    font-weight: bold;
+                    color: green;
+                }
+                #badge {
+                    margin-top: 20px;
+                }
+                #badge img {
+                    width: 100px;
+                    height: auto;
+                }
             </style>
 
+            <!-- Tabla de checklist -->
             <table id="data-table">
                 <thead>
                     <tr>
@@ -93,7 +112,19 @@
             <div>Total App Reproducibility Percentage: <span id="total">0%</span></div>
 
             <!-- Contenedor para el gráfico de radar -->
-            <canvas id="radialChart" width="400" height="400"></canvas>
+            <canvas id="radialChart" width="100" height="100"></canvas>
+
+            <!-- Botones para certificar e imprimir -->
+            <div id="buttons">
+                <button id="certifyButton" class="btn btn-success">Certify</button>
+                <button id="printButton" class="btn btn-primary">Print</button>
+            </div>
+
+            <!-- Hash de certificación -->
+            <div id="certificationHash">Certification Hash: <span id="hashValue">Not certified yet</span></div>
+
+            <!-- Insignia de certificación -->
+            <div id="badge"></div>
 
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <script>
@@ -101,6 +132,8 @@
                     const checkboxes = document.querySelectorAll('.percentage-checkbox');
                     const totalSpan = document.getElementById('total');
                     const ctx = document.getElementById('radialChart').getContext('2d');
+                    const hashValueSpan = document.getElementById('hashValue');
+                    const badgeDiv = document.getElementById('badge');
                     let total = 0;
 
                     // Datos iniciales del gráfico radial
@@ -164,10 +197,55 @@
                             }
                         });
                     });
+
+                    // Función para generar un hash usando el estado de los checkboxes
+                    async function generateHash() {
+                        const values = Array.from(checkboxes).map(cb => cb.checked ? '1' : '0').join('');
+                        const encoder = new TextEncoder();
+                        const data = encoder.encode(values);
+                        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                        const hashArray = Array.from(new Uint8Array(hashBuffer));
+                        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                        return hashHex;
+                    }
+
+                    // Función para mostrar la insignia de acuerdo con el porcentaje
+                    function showBadge(percentage) {
+                        badgeDiv.innerHTML = ''; // Limpiar cualquier badge anterior
+                        let badgeImg = document.createElement('img');
+                        
+                        if (percentage >= 40 && percentage < 60) {
+                            badgeImg.src = '/static/images/bronze.PNG';
+                            badgeImg.alt = 'Bronze Badge';
+                        } else if (percentage >= 60 && percentage < 80) {
+                            badgeImg.src = '/static/images/silver.PNG';
+                            badgeImg.alt = 'Silver Badge';
+                        } else if (percentage >= 80 && percentage <= 100) {
+                            badgeImg.src = '/static/images/gold.PNG';
+                            badgeImg.alt = 'Gold Badge';
+                        }
+
+                        if (badgeImg.src) {
+                            badgeDiv.appendChild(badgeImg);
+                        }
+                    }
+
+                    // Función para certificar
+                    document.getElementById('certifyButton').addEventListener('click', async function() {
+                        const hash = await generateHash();
+                        hashValueSpan.textContent = hash;
+                        showBadge(total);
+                        alert('Certification successful! Hash generated: ' + hash);
+                    });
+
+                    // Función para imprimir la tabla, gráfica y el hash
+                    document.getElementById('printButton').addEventListener('click', function() {
+                        window.print();
+                    });
                 });
             </script>
+
         </div>
     </div>
 </div>
-
 {% endblock %}
