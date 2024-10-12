@@ -381,6 +381,8 @@ def get_semanticscholar_info(title):
 
 # Function to get GitHub repository details
 def get_github_info(repo_url):
+    # Obtener el token de la variable de entorno 'CONSULTA'
+    token = os.getenv('CONSULTA')
     
     try:
         if not repo_url.startswith('https://github.com/'):
@@ -390,6 +392,11 @@ def get_github_info(repo_url):
         repo_path = repo_url.replace('https://github.com/', '').strip()
         api_url = f"https://api.github.com/repos/{repo_path}"
         headers = {'Accept': 'application/vnd.github+json'}
+        # Configurar los headers con el token
+        headers = {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': f'token {token}'  # Usar el token para autenticarse
+        }
         response = requests.get(api_url, headers=headers)
 
         if response.status_code == 200:
